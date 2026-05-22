@@ -1,0 +1,1335 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>圧力のふしぎ — SCOPE 実験講座</title>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700;900&family=Noto+Serif+JP:wght@400;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+:root{
+  --bg:#f0f6ff;--bg2:#e8f2ff;--bg3:#ddeeff;--panel:#fff;
+  --line:#b8d4f0;--line2:#90b8e0;--ink:#1a2d42;--ink2:#4a6a88;
+  --acc:#1a7fde;--acc-dim:rgba(26,127,222,.12);--acc-glow:rgba(26,127,222,.06);
+  --sim-bg:#e4f0ff;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:'M PLUS Rounded 1c',sans-serif;line-height:1.8;overflow-x:hidden;-webkit-font-smoothing:antialiased;}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background-image:radial-gradient(rgba(26,127,222,.07) 1px,transparent 1px);background-size:28px 28px;}
+header{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(240,246,255,.96);backdrop-filter:blur(16px);border-bottom:1px solid var(--line);padding:10px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit;cursor:pointer;transition:opacity .2s}
+.brand:hover{opacity:.7}
+.brand-logo{width:36px;height:36px;border-radius:50%;background:#fff;padding:2px;flex-shrink:0;border:1px solid var(--line2);}
+.brand-logo img{width:100%;height:100%;object-fit:contain;border-radius:50%;display:block}
+.brand-text{line-height:1.25}
+.brand-name{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;color:var(--ink);letter-spacing:.06em}
+.brand-sub{font-size:9px;color:var(--ink2);margin-top:2px;letter-spacing:.08em}
+.header-badge{font-family:'Space Mono',monospace;font-size:10px;font-weight:700;color:var(--ink2);letter-spacing:.18em;border:1px solid var(--line2);padding:5px 12px;white-space:nowrap;}
+#cloudOverlay{display:none;position:fixed;inset:0;z-index:9999;pointer-events:all;overflow:hidden}
+#cloudCanvas{position:absolute;inset:0;width:100%;height:100%}
+.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding:120px 40px 80px;position:relative;z-index:2;max-width:800px;margin:0 auto;background:linear-gradient(160deg,#f0f6ff 60%,#d8eeff);}
+.hero-eyebrow{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.28em;color:var(--ink2);display:flex;align-items:center;gap:12px;margin-bottom:28px;}
+.hero-eyebrow::before{content:'';width:28px;height:1px;background:var(--ink2);opacity:.5}
+.hero h1{font-family:'Noto Serif JP',serif;font-size:clamp(44px,8vw,88px);font-weight:900;line-height:1.05;letter-spacing:-.02em;margin-bottom:10px;color:var(--ink);}
+.hero h1 .ruled{color:var(--acc);border-bottom:2px solid var(--acc);padding-bottom:2px;}
+.hero-sub{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.2em;color:var(--ink2);margin-bottom:28px;}
+.hero-lead{font-size:14px;color:var(--ink2);max-width:480px;line-height:1.95;margin-bottom:44px;font-weight:500;}
+.hero-lead strong{color:var(--ink);font-weight:700}
+.btn-start{display:inline-flex;align-items:center;gap:10px;background:var(--acc);color:#fff;border:none;padding:14px 28px;font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.18em;cursor:pointer;transition:.2s;text-decoration:none;border-radius:6px;box-shadow:0 4px 16px rgba(26,127,222,.25);}
+.btn-start:hover{opacity:.85}
+.btn-start .arrow{transition:.2s}
+.btn-start:hover .arrow{transform:translateY(3px)}
+.hero-scroll{margin-top:64px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.22em;color:var(--ink2);display:flex;align-items:center;gap:10px;}
+.hero-scroll::after{content:'';width:40px;height:1px;background:var(--line2)}
+.sec{padding:88px 40px 64px;max-width:800px;margin:0 auto;position:relative;z-index:2;}
+.sec-alt-wrap{background:#e8f2ff;position:relative;z-index:2}
+.sec-head{margin-bottom:36px}
+.sec-label{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.28em;color:var(--acc);margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.sec-label::after{content:'';flex:1;max-width:48px;height:1px;background:var(--acc);opacity:.35}
+.sec-title{font-family:'Noto Serif JP',serif;font-size:clamp(26px,4.5vw,36px);font-weight:900;line-height:1.25;color:var(--ink);letter-spacing:-.01em;}
+.prose p{font-size:14px;line-height:1.95;color:var(--ink2);margin-bottom:14px;font-weight:500;}
+.prose p .hi{color:var(--ink);font-weight:700;border-bottom:1px solid var(--acc);padding-bottom:1px}
+.prose p strong{color:var(--ink);font-weight:700}
+.callout{border-left:3px solid var(--acc);padding:14px 18px;margin:22px 0;background:rgba(26,127,222,.06);border-radius:0 8px 8px 0;font-size:13px;line-height:1.85;color:var(--ink2);font-weight:500;}
+.callout-title{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.22em;color:var(--acc);margin-bottom:8px;display:block;font-weight:700;}
+.callout strong{color:var(--ink);font-weight:700}
+.callout-warn{border-left-color:#e08030;background:rgba(224,128,48,.05)}
+.callout-warn .callout-title{color:#e08030}
+.callout-warn strong{color:#e08030}
+.sim-wrap{border:1px solid var(--line);padding:20px;margin:24px 0;background:#f7fbff;border-radius:10px;box-shadow:0 2px 12px rgba(26,127,222,.08);}
+.sim-label{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.22em;color:var(--ink2);margin-bottom:12px;display:block;font-weight:700;}
+.sim-canvas{width:100%;display:block;background:#e0edff;border:1px solid var(--line2);border-radius:6px;height:auto;}
+.sim-controls{margin-top:14px;display:flex;flex-direction:column;gap:10px}
+.sim-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.sim-row label{font-family:'Space Mono',monospace;font-size:9px;color:var(--ink2);letter-spacing:.12em;min-width:96px;font-weight:700;}
+.sim-row input[type=range]{flex:1;min-width:100px;height:3px;-webkit-appearance:none;appearance:none;background:var(--line2);border-radius:999px;cursor:pointer;}
+.sim-row input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--acc);border:2px solid var(--bg);cursor:pointer;}
+.sim-row .val{font-family:'Space Mono',monospace;color:var(--acc);font-size:12px;font-weight:700;min-width:44px;text-align:right;}
+.readouts{display:grid;grid-template-columns:repeat(auto-fit,minmax(88px,1fr));gap:8px;margin-top:12px;}
+.readout{background:#fff;border:1px solid var(--line);padding:10px 12px;text-align:center;border-radius:6px;}
+.readout .k{font-family:'Space Mono',monospace;font-size:8px;color:var(--ink2);letter-spacing:.12em;margin-bottom:4px;display:block;font-weight:700;}
+.readout .v{font-family:'Space Mono',monospace;color:var(--acc);font-size:16px;font-weight:700}
+.graph-wrap{border:1px solid var(--line2);padding:20px;margin:24px 0;background:var(--panel);}
+.graph-hint{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.14em;color:var(--ink2);text-align:center;margin-bottom:10px;}
+.card-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+@media(max-width:480px){.card-grid{grid-template-columns:1fr}}
+.card{background:#fff;border:1px solid var(--line);padding:16px;transition:.2s;border-radius:8px;box-shadow:0 1px 6px rgba(26,127,222,.06);}
+.card[data-pvthl]{cursor:pointer}
+.card[data-pvthl]:hover{border-color:var(--acc);background:var(--acc-glow)}
+.card-icon{font-family:'Space Mono',monospace;font-size:10px;color:var(--acc);letter-spacing:.12em;margin-bottom:8px;display:block;}
+.card h4{font-family:'Space Mono',monospace;font-size:11px;color:var(--ink);letter-spacing:.08em;margin-bottom:6px;font-weight:700;}
+.card p{font-size:12px;line-height:1.65;color:var(--ink2);margin:0;font-weight:500}
+.quiz-block{background:#fff;border:1px solid var(--line);padding:20px;margin:12px 0;border-radius:10px;box-shadow:0 1px 6px rgba(26,127,222,.06);}
+.quiz-q{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:14px;line-height:1.6;display:flex;align-items:flex-start;gap:10px;}
+.quiz-q .qmark{font-family:'Space Mono',monospace;background:var(--acc);color:#0b0c0e;width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;}
+.quiz-opts{display:flex;flex-direction:column;gap:7px}
+.quiz-opt{background:#f5f9ff;border:1px solid var(--line);padding:11px 14px;font-family:inherit;font-size:13px;font-weight:500;color:var(--ink);text-align:left;cursor:pointer;transition:.15s;display:flex;align-items:center;gap:10px;border-radius:6px;}
+.quiz-opt:hover:not(:disabled){border-color:var(--acc);color:var(--ink);background:var(--acc-glow)}
+.quiz-opt .lbl{font-family:'Space Mono',monospace;width:22px;height:22px;background:var(--panel);border:1px solid var(--line2);color:var(--ink2);display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;}
+.quiz-opt.ok{border-color:#4a9eff;background:var(--acc-glow);color:var(--ink)}
+.quiz-opt.ok .lbl{background:var(--acc);color:#0b0c0e;border-color:var(--acc)}
+.quiz-opt.ng{border-color:#666;color:#666}
+.quiz-opt.ng .lbl{background:#333;color:#666;border-color:#444}
+.quiz-fb{margin-top:12px;padding:12px 14px;border-left:2px solid var(--acc);background:var(--acc-glow);font-size:13px;line-height:1.75;font-weight:500;color:var(--ink2);display:none;}
+.quiz-fb.show{display:block;animation:fadein .3s}
+@keyframes fadein{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.quiz-fb strong{color:var(--acc);font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.1em;display:block;margin-bottom:6px}
+.divider{height:1px;background:linear-gradient(90deg,transparent,var(--line),transparent);position:relative;z-index:2}
+footer{background:#1a2d42;border-top:1px solid var(--line);padding:60px 20px 36px;text-align:center;position:relative;z-index:2;}
+.footer-inner{max-width:560px;margin:0 auto;display:flex;flex-direction:column;align-items:center;gap:14px}
+.footer-logo{width:56px;height:56px;border-radius:50%;background:#fff;padding:3px;border:1px solid var(--line2);display:block;}
+.footer-logo img{width:100%;height:100%;object-fit:contain;border-radius:50%;display:block}
+.footer-name{font-family:'Space Mono',monospace;font-size:16px;font-weight:700;letter-spacing:.1em;color:#e8f4ff}
+.footer-tag{font-size:11px;color:#8ab4cc;letter-spacing:.12em}
+.footer-link{margin-top:4px;padding:9px 22px;background:transparent;color:var(--acc);text-decoration:none;font-family:'Space Mono',monospace;font-weight:700;border:1px solid var(--acc);font-size:10px;letter-spacing:.14em;transition:.2s;display:inline-block;}
+.footer-link:hover{background:var(--acc-dim)}
+.footer-copy{font-size:9px;color:#6a90aa;letter-spacing:.18em;margin-top:16px;font-family:'Space Mono',monospace}
+/* ===== INTRO ANIMATION ===== */
+#introVeil{position:fixed;inset:0;z-index:9998;background:#0a1220;pointer-events:none;}
+@keyframes introUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:none}}
+@keyframes introDown{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:none}}
+@keyframes introPop{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:scale(1)}}
+.intro-header{animation:introDown .6s cubic-bezier(.22,1,.36,1) both;animation-delay:3.8s}
+.intro-eyebrow{animation:introUp .6s cubic-bezier(.22,1,.36,1) both;animation-delay:4.0s}
+.intro-h1{animation:introUp .7s cubic-bezier(.22,1,.36,1) both;animation-delay:4.2s}
+.intro-sub{animation:introUp .6s cubic-bezier(.22,1,.36,1) both;animation-delay:4.5s}
+.intro-lead{animation:introUp .6s cubic-bezier(.22,1,.36,1) both;animation-delay:4.7s}
+.intro-btn{animation:introPop .5s cubic-bezier(.34,1.56,.64,1) both;animation-delay:5.0s}
+/* confetti */
+.confetti-canvas{position:fixed;inset:0;pointer-events:none;z-index:400;}
+.sim-readout-box{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;}
+.sim-readout-item{flex:1;min-width:120px;background:#fff;border:1px solid var(--line);border-radius:8px;padding:8px 14px;text-align:center;}
+.sim-readout-item .sri-label{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:.18em;color:var(--ink2);font-weight:700;display:block;margin-bottom:4px;}
+.sim-readout-item .sri-val{font-family:'Space Mono',monospace;font-size:18px;font-weight:700;color:var(--acc);}
+.sim-graph-section{margin-top:14px;}
+.sim-graph-toggle{font-family:'M PLUS Rounded 1c',sans-serif;font-size:12px;font-weight:700;padding:6px 18px;border-radius:6px;border:1px solid var(--acc);background:#fff;color:var(--acc);cursor:pointer;transition:.2s;}
+.sim-graph-toggle.active{background:var(--acc);color:#fff;}
+.sim-graph-panels{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px;}
+.sim-graph-panel{flex:1;min-width:200px;background:#fff;border:1px solid var(--line2);border-radius:8px;overflow:hidden;}
+.sim-graph-panel canvas{width:100%;display:block;}
+.pvimg-modal{display:none;position:fixed;inset:0;z-index:500;background:rgba(10,18,30,.88);justify-content:center;align-items:center;padding:20px;}
+.pvimg-modal.show{display:flex;}
+.pvimg-modal-inner{background:#fff;border-radius:12px;max-width:480px;width:100%;padding:24px;position:relative;max-height:88vh;overflow-y:auto;}
+.pvimg-modal-close{position:absolute;top:10px;right:12px;background:none;border:none;font-size:22px;cursor:pointer;color:#888;line-height:1;padding:2px 8px;}
+.pvimg-modal img{width:100%;border-radius:8px;margin-bottom:12px;display:block;object-fit:cover;}
+.pvimg-modal-title{font-family:'Space Mono',monospace;font-size:10px;font-weight:700;color:var(--acc);letter-spacing:.12em;display:block;margin-bottom:6px;}
+.pvimg-modal-caption{font-size:13px;line-height:1.85;color:var(--ink2);font-weight:500;}
+</style>
+</head>
+<body>
+
+<div id="introVeil" aria-hidden="true"></div>
+<canvas id="confettiCanvas" class="confetti-canvas" style="display:none"></canvas>
+<div id="cloudOverlay"><canvas id="cloudCanvas"></canvas></div>
+
+<header class="intro-header">
+  <a class="brand" id="scopeLink" href="javascript:void(0)">
+    <div class="brand-logo"><img src="scope-logo.webp" alt="SCOPE"></div>
+    <div class="brand-text">
+      <div class="brand-sub">東京理科大学 理科教育サークル</div>
+      <div class="brand-name">SCOPE</div>
+    </div>
+  </a>
+  <div class="header-badge">実験講座 #02</div>
+</header>
+
+<section class="hero">
+  <div class="hero-eyebrow intro-eyebrow">SCOPE EXPERIMENT WORKSHOP 2026</div>
+  <h1 class="intro-h1">圧力の<br><span class="ruled">ふしぎ</span></h1>
+  <p class="hero-sub intro-sub">PRESSURE &amp; MOLECULES</p>
+  <p class="hero-lead intro-lead">空気は<strong>見えない粒の集まり</strong>です。粒が壁をたたく力が「圧力」の正体です。スライダーを動かして体で感じてみましょう。</p>
+  <a href="#sec1" class="btn-start intro-btn">START <span class="arrow">↓</span></a>
+  <div class="hero-scroll">SCROLL TO BEGIN</div>
+</section>
+
+<div class="divider"></div>
+<div style="position:relative;z-index:2">
+<div class="sec" id="sec1">
+  <div class="sec-head">
+    <div class="sec-label">01 — 圧力とは</div>
+    <h2 class="sec-title">圧力とは何か</h2>
+  </div>
+  <div class="prose">
+    <p>空気は何もないように見えますが、実は<span class="hi">小さな粒（分子）</span>がものすごい速さで飛び回っています。</p>
+    <p>この粒たちが壁にぶつかるたびに、壁を押す力が生まれます。この<span class="hi">「たたく力の合計」が圧力</span>です。</p>
+  </div>
+
+  <div class="sim-wrap">
+    <canvas id="introCanvas" class="sim-canvas" width="560" height="160"></canvas>
+  </div>
+
+  <div class="prose" style="margin-top:16px">
+    <p>粒が<strong>多くぶつかるほど</strong>、または<strong>速くぶつかるほど</strong>、圧力は大きくなります。</p>
+  </div>
+
+  <!-- 比較SIM：粒が多い / 速さが速い -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px">
+    <div>
+      <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:6px;text-align:center">粒が多い</div>
+      <canvas id="manyCanvas" class="sim-canvas" width="280" height="160" style="width:100%"></canvas>
+    </div>
+    <div>
+      <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:6px;text-align:center">速さが速い</div>
+      <canvas id="fastCanvas" class="sim-canvas" width="280" height="160" style="width:100%"></canvas>
+    </div>
+  </div>
+
+  <p style="font-size:12px;color:var(--ink2);font-weight:500;margin-top:10px;line-height:1.7">青い丸が空気の粒を表しています。</p>
+</div>
+</div>
+
+<div class="divider"></div>
+<div class="sec-alt-wrap">
+<div class="sec" id="sec2">
+  <div class="sec-head">
+    <div class="sec-label">02 — シミュレーション</div>
+    <h2 class="sec-title">ペットボトルに空気を入れたときの変化を見よう</h2>
+  </div>
+
+  <!-- 操作ボタン -->
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;align-items:center">
+    <button id="pumpBtn" style="background:#1a7fde;color:#fff;border:none;padding:10px 22px;font-family:'M PLUS Rounded 1c',sans-serif;font-size:13px;font-weight:700;border-radius:8px;cursor:pointer;box-shadow:0 3px 10px rgba(26,127,222,.3);transition:all .15s">ポンプを押す</button>
+    <button id="capBtn" style="background:#fff;color:#1a7fde;border:2px solid #1a7fde;padding:10px 22px;font-family:'M PLUS Rounded 1c',sans-serif;font-size:13px;font-weight:700;border-radius:8px;cursor:pointer;transition:all .15s">ふたを開ける</button>
+    <button id="resetBtn" style="background:transparent;color:#6a90a8;border:1px solid #a0c4dc;padding:10px 16px;font-family:'M PLUS Rounded 1c',sans-serif;font-size:12px;font-weight:700;border-radius:8px;cursor:pointer;margin-left:auto">リセット</button>
+    <label style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--ink);cursor:pointer">
+      <input type="checkbox" id="cloudEffectChk" style="width:15px;height:15px;accent-color:#1a7fde;cursor:pointer">雲エフェクト
+    </label>
+  </div>
+  <!-- 使い方 -->
+  <details style="margin-bottom:10px;border:1px solid var(--line);border-radius:8px;background:#fff;overflow:hidden;">
+    <summary style="padding:10px 14px;font-size:12px;font-weight:700;color:var(--ink2);cursor:pointer;list-style:none;display:flex;align-items:center;gap:6px;">
+      <span style="font-family:'Space Mono',monospace;font-size:10px;color:var(--acc)">▶</span> 使い方を見る
+    </summary>
+    <div style="padding:12px 16px 14px;border-top:1px solid var(--line);font-size:12px;line-height:1.9;color:var(--ink2);font-weight:500;">
+      <ol style="padding-left:18px;display:flex;flex-direction:column;gap:6px;">
+        <li><b>「ポンプを押す」</b>をタップすると、ボトルに空気が1回分入ります。</li>
+        <li>圧力計・温度計の変化を観察しましょう。下の数値ボックスでも確認できます。</li>
+        <li><b>「グラフ ON」</b>にすると、押した回数と圧力・温度の関係がグラフで表示されます。</li>
+        <li><b>「ふたを開ける」</b>を押すと空気が抜けます。開けた瞬間の温度変化に注目！</li>
+        <li>「リセット」でいつでも最初からやり直せます。</li>
+      </ol>
+    </div>
+  </details>
+
+  <!-- メインSIM -->
+  <canvas id="volCanvas" class="sim-canvas" width="680" height="340" style="border-radius:12px;border:2px solid var(--line);width:100%;display:block"></canvas>
+
+  <!-- 数値表示枠 -->
+  <div class="sim-readout-box">
+    <div class="sim-readout-item"><span class="sri-label">圧力（絶対）</span><span class="sri-val" id="readoutPa">-- kPa</span></div>
+    <div class="sim-readout-item"><span class="sri-label">温度</span><span class="sri-val" id="readoutTc">-- ℃</span></div>
+  </div>
+
+  <!-- グラフ ON/OFF -->
+  <div class="sim-graph-section">
+    <button class="sim-graph-toggle" id="graphToggle">グラフ OFF</button>
+    <div id="graphPanels" class="sim-graph-panels" style="display:none">
+      <div class="sim-graph-panel"><canvas id="graphPV" width="300" height="200"></canvas></div>
+      <div class="sim-graph-panel"><canvas id="graphPT" width="300" height="200"></canvas></div>
+    </div>
+  </div>
+</div>
+</div>
+
+
+<div class="divider"></div>
+<div class="sec-alt-wrap">
+<div class="sec" id="sec3">
+  <div class="sec-head">
+    <div class="sec-label">03 — GRAPH VIEW</div>
+    <h2 class="sec-title">グラフで整理する</h2>
+  </div>
+  <div class="prose">
+    <p>シミュレーションで起きていたことを2つのグラフで確認しましょう。</p>
+  </div>
+  <div style="display:flex;gap:16px;flex-wrap:wrap;margin:20px 0;">
+    <div style="flex:1;min-width:220px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px;">
+      <div style="font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.18em;color:var(--acc);margin-bottom:8px;font-weight:700;">[ グラフ① ]　空気の量と圧力</div>
+      <canvas id="pvtCanvas" width="320" height="180" style="width:100%;display:block;border-radius:6px;"></canvas>
+      <p style="font-size:11px;color:var(--ink2);margin-top:8px;line-height:1.7;font-weight:500">空気を1回押すごとに圧力は<strong style="color:var(--ink)">一定量ずつ増える（比例関係）</strong>。大気圧（101.3 kPa）を切片として、グラフは右肩上がりの直線になります。</p>
+    </div>
+    <div style="flex:1;min-width:220px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px;">
+      <div style="font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.18em;color:var(--acc);margin-bottom:8px;font-weight:700;">[ グラフ② ]　圧力と温度</div>
+      <canvas id="pvtCanvas2" width="320" height="180" style="width:100%;display:block;border-radius:6px;"></canvas>
+      <p style="font-size:11px;color:var(--ink2);margin-top:8px;line-height:1.7;font-weight:500">空気を圧縮して入れると温度がわずかに上昇します。容器の体積が一定なら、<strong style="color:var(--ink)">圧力と温度は比例</strong>します（ゲイ＝リュサックの法則）。</p>
+    </div>
+  </div>
+  <div class="callout" style="margin-top:4px">
+    <span class="callout-title">// まとめ</span>
+    空気の粒が「<strong>多い</strong>」ほど、また「<strong>速く動く（温度が高い）</strong>」ほど、壁への衝突が増えて圧力が上がります。
+  </div>
+</div>
+</div>
+
+<div class="divider"></div>
+<div style="position:relative;z-index:2">
+<div class="sec" id="sec4">
+  <div class="sec-head">
+    <div class="sec-label">04 — REAL WORLD</div>
+    <h2 class="sec-title">身のまわりの圧力</h2>
+  </div>
+  <div class="prose"><p>圧力の知識は日常のあちこちで使われています。</p></div>
+  <p style="font-size:12px;color:var(--ink2);margin-bottom:8px;font-weight:500">※ カードをタップすると写真と解説が表示されます。</p>
+  <div class="card-grid">
+    <div class="card" data-pvimg="1" style="cursor:pointer"><span class="card-icon">[ 01 ]</span><h4>自転車の空気入れ</h4><p>ピストンで空気を圧縮して圧力を高め、タイヤへ送り込みます。</p></div>
+    <div class="card" data-pvimg="2" style="cursor:pointer"><span class="card-icon">[ 02 ]</span><h4>スプレー缶</h4><p>中身が高圧で充填されています。熱すると圧力が上がり破裂の危険があります。</p></div>
+    <div class="card" data-pvimg="3" style="cursor:pointer"><span class="card-icon">[ 03 ]</span><h4>天気予報の低気圧</h4><p>周囲より気圧が低い領域。空気が流れ込んで上昇し、雲ができます。</p></div>
+    <div class="card" data-pvimg="4" style="cursor:pointer"><span class="card-icon">[ 04 ]</span><h4>真空パック</h4><p>袋の中の空気を抜くと、外側の大気圧が袋を押さえつけて密着します。</p></div>
+  </div>
+
+<!-- 写真モーダル -->
+<div class="pvimg-modal" id="pvimgModal">
+  <div class="pvimg-modal-inner">
+    <button class="pvimg-modal-close" id="pvimgClose">&times;</button>
+    <img id="pvimgPhoto" src="" alt="">
+    <span class="pvimg-modal-title" id="pvimgTitle"></span>
+    <p class="pvimg-modal-caption" id="pvimgCaption"></p>
+  </div>
+</div>
+</div>
+</div>
+
+<div class="divider"></div>
+<div class="sec-alt-wrap">
+<div class="sec" id="sec5">
+  <div class="sec-head">
+    <div class="sec-label">05 — QUIZ</div>
+    <h2 class="sec-title">理解度を確認する</h2>
+  </div>
+  <div class="quiz-block" data-answer="0">
+    <div class="quiz-q"><span class="qmark">Q</span>密閉した容器に入った気体を温めると、圧力はどうなりますか？</div>
+    <div class="quiz-opts">
+      <button class="quiz-opt"><span class="lbl">A</span>上がる</button>
+      <button class="quiz-opt"><span class="lbl">B</span>下がる</button>
+      <button class="quiz-opt"><span class="lbl">C</span>変わらない</button>
+      <button class="quiz-opt"><span class="lbl">D</span>ゼロになる</button>
+    </div>
+    <div class="quiz-fb"><strong>// CORRECT : A</strong>温めると粒の速さが増し、壁へのぶつかりが激しくなります。そのため圧力が上がります。</div>
+  </div>
+  <div class="quiz-block" data-answer="1">
+    <div class="quiz-q"><span class="qmark">Q</span>真夏の車内に置きっぱなしのスプレー缶が危険な理由は何ですか？</div>
+    <div class="quiz-opts">
+      <button class="quiz-opt"><span class="lbl">A</span>中身が腐るから</button>
+      <button class="quiz-opt"><span class="lbl">B</span>温度上昇で内部の圧力が高くなり、破裂する恐れがあるから</button>
+      <button class="quiz-opt"><span class="lbl">C</span>太陽光で中身が固まるから</button>
+      <button class="quiz-opt"><span class="lbl">D</span>重力で潰れるから</button>
+    </div>
+    <div class="quiz-fb"><strong>// CORRECT : B</strong>密閉容器内の気体は温度が上がると圧力も上がります。容器が耐えきれずに破裂することがあります。</div>
+  </div>
+  <div class="quiz-block" data-answer="2">
+    <div class="quiz-q"><span class="qmark">Q</span>注射器のピストンを押し込んで空気を圧縮すると、何が起きますか？</div>
+    <div class="quiz-opts">
+      <button class="quiz-opt"><span class="lbl">A</span>粒の数が増える</button>
+      <button class="quiz-opt"><span class="lbl">B</span>粒が消える</button>
+      <button class="quiz-opt"><span class="lbl">C</span>粒は同じ数のまま、ぶつかる回数が増えて圧力が上がる</button>
+      <button class="quiz-opt"><span class="lbl">D</span>何も変わらない</button>
+    </div>
+    <div class="quiz-fb"><strong>// CORRECT : C</strong>粒の数は変わりません。空間が小さくなった分、壁にぶつかる頻度が増えて圧力として感じます。</div>
+  </div>
+</div>
+</div>
+
+<div class="divider"></div>
+<footer>
+  <div class="footer-inner">
+    <a id="footerScopeLink" href="javascript:void(0)" class="footer-logo"><img src="scope-logo.webp" alt="SCOPE"></a>
+    <div class="footer-name">SCOPE</div>
+    <div class="footer-tag">東京理科大学 理科教育サークル</div>
+    <a class="footer-link" id="footerLink" href="javascript:void(0)">tus-scope.tokyo</a>
+    <div class="footer-copy">© SCOPE — EXPERIMENT LAB — 2026</div>
+  </div>
+</footer>
+
+<script>
+/* ===== QUIZ ===== */
+document.querySelectorAll('.quiz-block').forEach(q=>{
+  const ans=+q.dataset.answer;
+  const opts=q.querySelectorAll('.quiz-opt');
+  const fb=q.querySelector('.quiz-fb');
+  opts.forEach((o,i)=>o.addEventListener('click',()=>{
+    if(q.classList.contains('done'))return;
+    q.classList.add('done');opts.forEach(x=>x.disabled=true);
+    i===ans?o.classList.add('ok'):(o.classList.add('ng'),opts[ans].classList.add('ok'));
+    fb.classList.add('show');
+  }));
+});
+
+/* ===== 弾性衝突共通関数 =====
+ * 等質量・完全弾性衝突。衝突軸方向の速度成分を交換する。
+ * 重なり解消 → 速度交換の順で処理し、粒の貫通を防ぐ。
+ */
+function resolveCollisions(pts){
+  for(let i=0;i<pts.length;i++){
+    for(let j=i+1;j<pts.length;j++){
+      const a=pts[i],b=pts[j];
+      const rSum=a.r+b.r;
+      const dx=b.x-a.x,dy=b.y-a.y;
+      const dist2=dx*dx+dy*dy;
+      if(dist2===0||dist2>=rSum*rSum)continue;
+      const dist=Math.sqrt(dist2);
+      const nx=dx/dist,ny=dy/dist;
+      // 重なり解消
+      const ov=(rSum-dist)/2;
+      a.x-=nx*ov;a.y-=ny*ov;
+      b.x+=nx*ov;b.y+=ny*ov;
+      // 速度成分交換（等質量）
+      const va=a.vx*nx+a.vy*ny;
+      const vb=b.vx*nx+b.vy*ny;
+      if(va-vb<=0)continue;
+      a.vx+=(vb-va)*nx;a.vy+=(vb-va)*ny;
+      b.vx+=(va-vb)*nx;b.vy+=(va-vb)*ny;
+    }
+  }
+}
+
+/* ===== INTRO SIM ===== */
+(function(){
+  const c=document.getElementById('introCanvas');if(!c)return;
+  const ctx=c.getContext('2d');
+  const W=c.width,H=c.height,BOX=W-60;
+  const PR=5;
+  const pts=[];
+  while(pts.length<12){
+    const x=44+Math.random()*(BOX-88),y=18+Math.random()*(H-36);
+    if(pts.every(q=>(q.x-x)**2+(q.y-y)**2>=(2*PR)**2))
+      pts.push({x,y,vx:(Math.random()<.5?1:-1)*(1.4+Math.random()*1.4),vy:(Math.random()-.5)*2.5,r:PR});
+  }
+  let wallFlashes=[];
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    const bg=ctx.createLinearGradient(0,0,0,H);bg.addColorStop(0,'#ddefff');bg.addColorStop(1,'#c8e4ff');
+    ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='rgba(26,127,222,.04)';
+    for(let x=14;x<W;x+=28)for(let y=14;y<H;y+=28){ctx.beginPath();ctx.arc(x,y,1.5,0,Math.PI*2);ctx.fill();}
+    wallFlashes=wallFlashes.filter(f=>{
+      f.a*=0.84;if(f.a<0.04)return false;
+      ctx.strokeStyle=`rgba(26,127,222,${f.a*.6})`;ctx.lineWidth=1;
+      for(let r=3;r<16;r+=4){ctx.beginPath();ctx.arc(f.x,f.y,r,0,Math.PI*2);ctx.stroke();}
+      return true;
+    });
+    ctx.strokeStyle='rgba(26,127,222,.4)';ctx.lineWidth=1.5;ctx.strokeRect(30,10,BOX-30,H-20);
+    for(const p of pts){
+      p.x+=p.vx;p.y+=p.vy;
+      if(p.x-p.r<30){p.x=30+p.r;p.vx=Math.abs(p.vx);wallFlashes.push({x:30,y:p.y,a:1});}
+      if(p.x+p.r>BOX){p.x=BOX-p.r;p.vx=-Math.abs(p.vx);wallFlashes.push({x:BOX,y:p.y,a:1});}
+      if(p.y-p.r<10){p.y=10+p.r;p.vy=Math.abs(p.vy);wallFlashes.push({x:p.x,y:10,a:1});}
+      if(p.y+p.r>H-10){p.y=H-10-p.r;p.vy=-Math.abs(p.vy);wallFlashes.push({x:p.x,y:H-10,a:1});}
+    }
+    resolveCollisions(pts);
+    ctx.fillStyle='#1a7fde';
+    for(const p of pts){ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();}
+    ctx.fillStyle='rgba(255,255,255,.3)';
+    for(const p of pts){ctx.beginPath();ctx.arc(p.x-1,p.y-1,p.r*.4,0,Math.PI*2);ctx.fill();}
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+/* ===== 比較SIM（粒が多い） ===== */
+(function(){
+  const c=document.getElementById('manyCanvas');if(!c)return;
+  const ctx=c.getContext('2d');
+  const W=c.width,H=c.height;
+  const L=10,R=W-10,T=10,B=H-10;
+  const PR=4;
+  const pts=[];
+  while(pts.length<28){
+    const x=L+PR+Math.random()*(R-L-PR*2);
+    const y=T+PR+Math.random()*(B-T-PR*2);
+    if(pts.every(q=>(q.x-x)**2+(q.y-y)**2>=(2*PR)**2))
+      pts.push({x,y,vx:(Math.random()-.5)*2.2,vy:(Math.random()-.5)*2.2,r:PR});
+  }
+  let wf=[];
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    const bg=ctx.createLinearGradient(0,0,0,H);bg.addColorStop(0,'#ddefff');bg.addColorStop(1,'#c8e4ff');
+    ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='rgba(26,127,222,.04)';
+    for(let x=14;x<W;x+=28)for(let y=14;y<H;y+=28){ctx.beginPath();ctx.arc(x,y,1.5,0,Math.PI*2);ctx.fill();}
+    wf=wf.filter(f=>{f.a*=0.82;if(f.a<0.04)return false;
+      ctx.strokeStyle=`rgba(26,127,222,${f.a*.6})`;ctx.lineWidth=1;
+      for(let r=3;r<12;r+=3){ctx.beginPath();ctx.arc(f.x,f.y,r,0,Math.PI*2);ctx.stroke();}return true;});
+    ctx.strokeStyle='rgba(26,127,222,.4)';ctx.lineWidth=1.5;ctx.strokeRect(L,T,R-L,B-T);
+    for(const p of pts){
+      p.x+=p.vx;p.y+=p.vy;
+      if(p.x-p.r<L){p.x=L+p.r;p.vx=Math.abs(p.vx);wf.push({x:L,y:p.y,a:1});}
+      if(p.x+p.r>R){p.x=R-p.r;p.vx=-Math.abs(p.vx);wf.push({x:R,y:p.y,a:1});}
+      if(p.y-p.r<T){p.y=T+p.r;p.vy=Math.abs(p.vy);wf.push({x:p.x,y:T,a:1});}
+      if(p.y+p.r>B){p.y=B-p.r;p.vy=-Math.abs(p.vy);wf.push({x:p.x,y:B,a:1});}
+    }
+    resolveCollisions(pts);
+    ctx.fillStyle='#1a7fde';
+    for(const p of pts){ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();}
+    ctx.fillStyle='rgba(255,255,255,.3)';
+    for(const p of pts){ctx.beginPath();ctx.arc(p.x-1,p.y-1,p.r*.4,0,Math.PI*2);ctx.fill();}
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+/* ===== 比較SIM（速さが速い） ===== */
+(function(){
+  const c=document.getElementById('fastCanvas');if(!c)return;
+  const ctx=c.getContext('2d');
+  const W=c.width,H=c.height;
+  const L=10,R=W-10,T=10,B=H-10;
+  const PR=4;
+  const pts=[];
+  while(pts.length<12){
+    const x=L+PR+Math.random()*(R-L-PR*2);
+    const y=T+PR+Math.random()*(B-T-PR*2);
+    if(pts.every(q=>(q.x-x)**2+(q.y-y)**2>=(2*PR)**2))
+      pts.push({x,y,vx:(Math.random()-.5)*5.5,vy:(Math.random()-.5)*5.5,r:PR});
+  }
+  let wf=[];
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    const bg=ctx.createLinearGradient(0,0,0,H);bg.addColorStop(0,'#ddefff');bg.addColorStop(1,'#c8e4ff');
+    ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='rgba(26,127,222,.04)';
+    for(let x=14;x<W;x+=28)for(let y=14;y<H;y+=28){ctx.beginPath();ctx.arc(x,y,1.5,0,Math.PI*2);ctx.fill();}
+    wf=wf.filter(f=>{f.a*=0.82;if(f.a<0.04)return false;
+      ctx.strokeStyle=`rgba(26,127,222,${f.a*.6})`;ctx.lineWidth=1;
+      for(let r=3;r<12;r+=3){ctx.beginPath();ctx.arc(f.x,f.y,r,0,Math.PI*2);ctx.stroke();}return true;});
+    ctx.strokeStyle='rgba(26,127,222,.4)';ctx.lineWidth=1.5;ctx.strokeRect(L,T,R-L,B-T);
+    for(const p of pts){
+      p.x+=p.vx;p.y+=p.vy;
+      if(p.x-p.r<L){p.x=L+p.r;p.vx=Math.abs(p.vx);wf.push({x:L,y:p.y,a:1});}
+      if(p.x+p.r>R){p.x=R-p.r;p.vx=-Math.abs(p.vx);wf.push({x:R,y:p.y,a:1});}
+      if(p.y-p.r<T){p.y=T+p.r;p.vy=Math.abs(p.vy);wf.push({x:p.x,y:T,a:1});}
+      if(p.y+p.r>B){p.y=B-p.r;p.vy=-Math.abs(p.vy);wf.push({x:p.x,y:B,a:1});}
+    }
+    resolveCollisions(pts);
+    ctx.fillStyle='#1a7fde';
+    for(const p of pts){ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();}
+    ctx.fillStyle='rgba(255,255,255,.3)';
+    for(const p of pts){ctx.beginPath();ctx.arc(p.x-1,p.y-1,p.r*.4,0,Math.PI*2);ctx.fill();}
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+/* ===== BOTTLE SIM v10 ===== */
+(function(){
+  const c    = document.getElementById('volCanvas');
+  if(!c) return;
+  const ctx   = c.getContext('2d');
+  const W = c.width, H = c.height;
+
+  // ── 物理定数 ──
+  const GAMMA   = 1.4;
+  const EXP_PT  = (GAMMA-1)/GAMMA;
+  const T_ROOM  = 300;       // K
+  const K_WALL  = 0.008;  // 熱緩和定数（現実的な壁冷却速度）
+  const UNIT_PA = 3300;   // 1粒子あたりの圧力寄与（10回で≈300kPa）
+  const N_PER   = 6;
+  const MAX_N   = N_PER * 10;  // 60粒子 → 最大≈299kPa
+  const PR = 4, SPD = 3.5;
+
+  function e_sat(Tk){ const c=Tk-273.15; return 611*Math.exp(17.27*c/(c+237.3)); }
+  function calcRH(N,Tk){
+    return 0.5*e_sat(T_ROOM)*((N*UNIT_PA+101325)/101325)/e_sat(Tk);
+  }
+
+  // ── レイアウト（canvas H=340に合わせて調整）──
+  const BX=W*0.40, NW=28, BW=145;
+  const NT=36, NB=NT+40, BT=NB+32, BB=H-18;
+  const SL=BX-BW/2+5, SR=BX+BW/2-5, ST=BT+4, SB=BB-8;
+
+  // ポンプ（左）
+  const PX=46, PW=22, CT=46, CB=H-58, CH=CB-CT, PIH=17, MPD=CH*0.75;
+  const HSX=PX+PW/2+2, HSY=CB+5;
+
+  // 計器エリア（右）─ GW を広めに取り数値がはみ出ないように
+  const GX=BX+BW/2+14, GW=W-GX-4;
+  // 温度計（上）
+  const THT=24, THH=Math.floor((H/2)-THT-8), THCX=GX+GW/2, TUBE=10, BULB=9;
+  // 圧力計（下、円形）
+  const PMCX=GX+GW/2, PMCY=H/2+Math.floor((H-H/2)/2), PMR=Math.min(Math.floor(GW/2)-4,38);
+
+  // ── 状態 ──
+  let pts=[], wf=[], ep=[], dp=[];
+  let pc=0, ph=0, ptA=0, piF=false, ir=0, ifc=0;
+  let co=false, cay=0, st=0, sp=0, et=0;
+  let TK=T_ROOM, cloud=0;
+
+  // UI要素（グラフ関連は削除済みなのでnullになるだけ）
+  const cloudChk  = document.getElementById('cloudEffectChk');
+  const pumpBtn   = document.getElementById('pumpBtn');
+  const capBtn    = document.getElementById('capBtn');
+  const resetBtn  = document.getElementById('resetBtn');
+
+  // ── ボタン ──
+  let _pumpLast=0;
+  pumpBtn.onclick=(e)=>{
+    e.stopPropagation();
+    if(ph!==0)return;
+    if(pts.length>=MAX_N){sp=1;st=0;return;}
+    ph=1;ptA=0;piF=false;
+  };
+  let _capLock=false;
+  capBtn.onclick=(e)=>{
+    e.stopPropagation();
+    if(_capLock)return;
+    _capLock=true;setTimeout(()=>{_capLock=false;},600);
+    co=!co;
+    if(co){
+      capBtn.textContent='ふたを閉める';
+      capBtn.style.background='#1a7fde';capBtn.style.color='#fff';
+      // ふたを開けた瞬間の断熱膨張冷却（現実的：-10〜-20℃程度）
+      // 凝縮熱で自己加熱されるため、理論値より大幅に小さい
+      const dropDeg=6+(pts.length/MAX_N)*10;  // 圧力が高いほど大きく冷える（最大-16℃）
+      TK=Math.max(T_ROOM-18, TK-dropDeg);
+      // ふたを開けたらグラフリセット
+      window._simGD=[];
+    } else {
+      capBtn.textContent='ふたを開ける';
+      capBtn.style.background='#fff';capBtn.style.color='#1a7fde';
+    }
+  };
+  capBtn.addEventListener('touchstart',(e)=>{e.stopPropagation();},{passive:true});
+  resetBtn.onclick=(e)=>{
+    e.stopPropagation();
+    pts=[];wf=[];ep=[];dp=[];
+    pc=0;ph=0;ptA=0;piF=false;ir=0;ifc=0;
+    co=false;cay=0;st=0;sp=0;et=0;TK=T_ROOM;cloud=0;
+    window._simGD=[];
+    capBtn.textContent='ふたを開ける';
+    capBtn.style.background='#fff';capBtn.style.color='#1a7fde';
+  };
+
+  // ── 注入 ──
+  function inj(n){ir+=n;ifc=0;}
+  function injTick(){
+    if(ir<=0)return;
+    if(++ifc<2)return;ifc=0;
+    const x=BX+(Math.random()-.5)*10,y=NB+PR+2;
+    if(!pts.some(q=>(q.x-x)**2+(q.y-y)**2<(2*PR)**2)){
+      const a=Math.PI/2+(Math.random()-.5)*0.5;
+      pts.push({x,y,vx:Math.cos(a)*SPD,vy:Math.sin(a)*SPD,r:PR});
+      ir--;wf.push({x:BX,y:NT+4,a:1,inj:true});
+    }
+  }
+
+  // ── ボトルpath ──
+  function bPath(){
+    ctx.beginPath();
+    ctx.moveTo(BX-NW/2,NT);ctx.lineTo(BX-NW/2,NB);
+    ctx.bezierCurveTo(BX-NW/2,NB+18,BX-BW/2,BT-14,BX-BW/2,BT);
+    ctx.lineTo(BX-BW/2,BB-14);
+    ctx.bezierCurveTo(BX-BW/2,BB-3,BX-BW/2+11,BB,BX-18,BB);
+    ctx.lineTo(BX+18,BB);
+    ctx.bezierCurveTo(BX+BW/2-11,BB,BX+BW/2,BB-3,BX+BW/2,BB-14);
+    ctx.lineTo(BX+BW/2,BT);
+    ctx.bezierCurveTo(BX+BW/2,BT-14,BX+NW/2,NB+18,BX+NW/2,NB);
+    ctx.lineTo(BX+NW/2,NT);ctx.closePath();
+  }
+
+  // ── メインループ ──
+  function loop(){
+    ctx.clearRect(0,0,W,H);
+    const bg=ctx.createLinearGradient(0,0,0,H);
+    bg.addColorStop(0,'#ddefff');bg.addColorStop(1,'#c8e4ff');
+    ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='rgba(26,127,222,.05)';
+    for(let x=14;x<W;x+=28)for(let y=14;y<H;y+=28){ctx.beginPath();ctx.arc(x,y,1.5,0,Math.PI*2);ctx.fill();}
+
+    // 熱緩和：圧力に比例した定常状態温度へ向かって緩やか変化
+    // 現実の実験：300kPaで約+2℃程度（凝縮熱で自己加熱するため冷えにくい）
+    const P_total=pts.length*UNIT_PA+101325;
+    const TK_ss=T_ROOM+(P_total-101325)/(MAX_N*UNIT_PA)*2.5;  // 最大+2.5℃
+    TK+=(TK_ss-TK)*K_WALL;
+
+    // ポンプ
+    const w=1+(pts.length/(N_PER*2))*0.18;
+    if(ph===1){ptA=Math.min(1,ptA+1/(16*w));if(ptA>=1){ptA=1;ph=2;piF=true;}}
+    else if(ph===2){ptA=Math.max(0,ptA-1/(22*w));if(piF&&ptA<0.5){inj(N_PER);pc++;piF=false;
+      // グラフ用データ記録（最大10点、注入直後）
+      if(window._simGD&&window._simGD.length<10){const nn=pts.length+N_PER,pp=nn*UNIT_PA+101325;window._simGD.push({n:Math.round(nn/N_PER),Pa:pp,Tc:TK-273.15});}}if(ptA<=0){ptA=0;ph=0;}}
+    injTick();
+    const ease=ptA<.5?2*ptA*ptA:1-Math.pow(-2*ptA+2,2)/2;
+    const pY=CT+ease*MPD;
+
+    // 震え
+    let soff=0;
+    if(sp>0){st+=0.35;soff=Math.sin(st*14)*5*Math.max(0,1-st/2);if(st>2.5)sp=0;}
+
+    // ふたアニメ
+    cay+=((co?1:0)-cay)*0.14;
+    const cOY=cay*(-28);
+
+    // ふた開放中: 粒が逃げる
+    if(co&&pts.length>0){
+      et++;
+      if(et>=2){
+        et=0;
+        let ei=pts.findIndex(p=>p.y<NB+PR*4);if(ei<0)ei=Math.floor(Math.random()*pts.length);
+        const e=pts.splice(ei,1)[0];
+        ep.push({x:e.x,y:NT-8,vx:(Math.random()-.5)*4,vy:-2.5-Math.random()*2.5,a:1});
+        if(pc>0)pc=Math.max(0,pc-1);
+        const Pn=pts.length*UNIT_PA+101325,Po=Pn+UNIT_PA;
+        if(Po>101325) TK+=TK*(Math.pow(Pn/Po,EXP_PT)-1)*0.15;
+      }
+    } else {et=0;}
+
+    // 雲
+    const showCl=cloudChk&&cloudChk.checked;
+    const RH=calcRH(pts.length,TK),S=Math.max(0,RH-1);
+    const pb=Math.min(pts.length/MAX_N,1);
+    const cTarget=showCl?Math.min(S*2.5*(0.3+pb*0.7),0.85):0;
+    cloud+=(cTarget-cloud)*0.05;
+    if(showCl&&S>0.1&&Math.random()<S*0.12*pb)
+      dp.push({x:BX+(Math.random()-.5)*BW*.85,y:BT+Math.random()*(SB-BT),r:1+Math.random()*2.5,life:1});
+    dp=dp.filter(d=>{d.life-=showCl&&S>0.05?0.002:0.025;return d.life>0;});
+
+    // 脱出パフ
+    ep=ep.filter(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=0.08;p.a*=0.88;
+      if(p.a<0.04)return false;
+      ctx.fillStyle=`rgba(26,127,222,${p.a*.4})`;ctx.beginPath();ctx.arc(p.x,p.y,PR,0,Math.PI*2);ctx.fill();return true;});
+
+    // ホース（ボトル背面にクリップ）
+    // 描画後にボトル外枠で上書きして「背面」に見せる
+    const capY_top=NT-4+cOY, HEX=BX, HEY=capY_top+2;
+    // ホースをボトル外枠より先に描く → 外枠で隠れる
+    ctx.save();ctx.globalAlpha=0.45;
+    ctx.strokeStyle='#6ab0e8';ctx.lineWidth=6;ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(HSX+soff,HSY);
+    ctx.bezierCurveTo(HSX+soff,HSY+80,BX,H-20,HEX,HEY);
+    ctx.stroke();
+    ctx.strokeStyle='rgba(255,255,255,.3)';ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(HSX+soff,HSY);
+    ctx.bezierCurveTo(HSX+soff,HSY+80,BX,H-20,HEX,HEY);
+    ctx.stroke();
+    ctx.globalAlpha=1;ctx.lineCap='butt';ctx.restore();
+
+    // ポンプ
+    const PXs=PX+soff;
+    ctx.fillStyle='#e0f0ff';ctx.beginPath();ctx.roundRect(PXs-PW/2-6,CT-6,PW+12,CH+12,8);ctx.fill();
+    ctx.strokeStyle='#7ab8e0';ctx.lineWidth=2;ctx.beginPath();ctx.roundRect(PXs-PW/2-6,CT-6,PW+12,CH+12,8);ctx.stroke();
+    ctx.fillStyle='#f8fdff';ctx.fillRect(PXs-PW/2,CT,PW,CH);
+    if(ease>0){const cg=ctx.createLinearGradient(0,pY+PIH,0,CB);cg.addColorStop(0,`rgba(100,180,240,${ease*.22})`);cg.addColorStop(1,`rgba(26,127,222,${ease*.12})`);ctx.fillStyle=cg;ctx.fillRect(PXs-PW/2,pY+PIH,PW,CB-(pY+PIH));}
+    ctx.strokeStyle='#aad0f0';ctx.lineWidth=1;ctx.strokeRect(PXs-PW/2,CT,PW,CH);
+    const pg=ctx.createLinearGradient(PXs-PW/2,0,PXs+PW/2,0);pg.addColorStop(0,'#6aacdc');pg.addColorStop(.5,'#90c4ec');pg.addColorStop(1,'#6aacdc');
+    ctx.fillStyle=pg;ctx.beginPath();ctx.roundRect(PXs-PW/2,pY,PW,PIH,3);ctx.fill();
+    ctx.strokeStyle='#4a8cc0';ctx.lineWidth=1.5;ctx.beginPath();ctx.roundRect(PXs-PW/2,pY,PW,PIH,3);ctx.stroke();
+    const hg=ctx.createLinearGradient(PXs-PW/2-10,0,PXs+PW/2+10,0);hg.addColorStop(0,'#7ab8e0');hg.addColorStop(.5,'#a8d4f4');hg.addColorStop(1,'#7ab8e0');
+    ctx.fillStyle=hg;ctx.beginPath();ctx.roundRect(PXs-PW/2-10,pY-26,PW+20,26,6);ctx.fill();
+    ctx.strokeStyle='#5aa0cc';ctx.lineWidth=1.5;ctx.beginPath();ctx.roundRect(PXs-PW/2-10,pY-26,PW+20,26,6);ctx.stroke();
+    ctx.strokeStyle='rgba(255,255,255,.6)';ctx.lineWidth=1.5;
+    for(let i=0;i<3;i++){const gx=PXs-7+i*9;ctx.beginPath();ctx.moveTo(gx,pY-21);ctx.lineTo(gx,pY-8);ctx.stroke();}
+    ctx.fillStyle='#5a9acc';ctx.beginPath();ctx.roundRect(PXs-PW/2-2,CB,PW+4,12,4);ctx.fill();
+    ctx.fillStyle='#2a6090';ctx.font='700 9px M PLUS Rounded 1c,sans-serif';ctx.textAlign='center';
+    ctx.fillText('空気入れ',PXs,CT-14);
+    if(pts.length>=MAX_N){ctx.fillStyle='#e05050';ctx.fillText('限界',PXs,CB+26);}
+    ctx.textAlign='left';
+
+    // 壁エフェクト
+    wf=wf.filter(f=>{f.a*=0.80;if(f.a<0.04)return false;
+      ctx.strokeStyle=`rgba(26,127,222,${f.a*(f.inj?.85:.5)})`;ctx.lineWidth=1;
+      for(let r=3;r<(f.inj?16:11);r+=3){ctx.beginPath();ctx.arc(f.x,f.y,r,0,Math.PI*2);ctx.stroke();}return true;});
+
+    // ボトル内部背景
+    ctx.save();bPath();ctx.clip();
+    const den=Math.min(pts.length/MAX_N,1);
+    const bi=ctx.createLinearGradient(0,NT,0,BB);
+    bi.addColorStop(0,`rgba(180,220,255,${.12+den*.14})`);bi.addColorStop(1,`rgba(130,190,255,${.18+den*.18})`);
+    ctx.fillStyle=bi;ctx.fillRect(0,0,W,H);ctx.restore();
+
+    // 粒の物理
+    for(const p of pts){
+      p.x+=p.vx;p.y+=p.vy;
+      if(!co&&p.y-p.r<NT+2){p.y=NT+2+p.r;p.vy=Math.abs(p.vy);wf.push({x:p.x,y:NT+2,a:.7});}
+      if(p.y>=NT&&p.y<NB){if(p.x-p.r<BX-NW/2+2){p.x=BX-NW/2+2+p.r;p.vx=Math.abs(p.vx);}if(p.x+p.r>BX+NW/2-2){p.x=BX+NW/2-2-p.r;p.vx=-Math.abs(p.vx);}}
+      if(p.y>=NB&&p.y<BT){const f=(p.y-NB)/(BT-NB),hw=NW/2+f*(BW/2-NW/2)-5;if(p.x-p.r<BX-hw){p.x=BX-hw+p.r;p.vx=Math.abs(p.vx);wf.push({x:BX-hw,y:p.y,a:.6});}if(p.x+p.r>BX+hw){p.x=BX+hw-p.r;p.vx=-Math.abs(p.vx);wf.push({x:BX+hw,y:p.y,a:.6});}}
+      if(p.y>=BT&&p.y<=SB){if(p.x-p.r<SL){p.x=SL+p.r;p.vx=Math.abs(p.vx);wf.push({x:SL,y:p.y,a:1});}if(p.x+p.r>SR){p.x=SR-p.r;p.vx=-Math.abs(p.vx);wf.push({x:SR,y:p.y,a:1});}}
+      if(p.y+p.r>SB){p.y=SB-p.r;p.vy=-Math.abs(p.vy);wf.push({x:p.x,y:SB,a:1});}
+    }
+    resolveCollisions(pts);
+
+    // ボトル外枠（ホースを隠す）← ホースより後に描く
+    ctx.save();bPath();
+    const bg2=ctx.createLinearGradient(BX-BW/2,0,BX+BW/2,0);
+    bg2.addColorStop(0,'rgba(255,255,255,.45)');bg2.addColorStop(.5,'rgba(255,255,255,.08)');bg2.addColorStop(1,'rgba(255,255,255,.25)');
+    ctx.fillStyle=bg2;ctx.fill();
+    ctx.strokeStyle='#6aa8d8';ctx.lineWidth=2.5;ctx.stroke();ctx.restore();
+
+    // 粒描画
+    ctx.save();bPath();ctx.clip();
+    ctx.fillStyle='#1a7fde';
+    for(const p of pts){ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();}
+    ctx.fillStyle='rgba(255,255,255,.28)';
+    for(const p of pts){ctx.beginPath();ctx.arc(p.x-1,p.y-1,p.r*.4,0,Math.PI*2);ctx.fill();}
+    ctx.restore();
+
+    // 雲・結露エフェクト
+    if(cloud>0.01){
+      ctx.save();bPath();ctx.clip();
+      ctx.fillStyle=`rgba(200,220,255,${cloud*0.82})`;ctx.fillRect(0,0,W,H);
+      for(let i=0;i<12;i++){
+        const cx=BX+Math.sin(i*2.3+Date.now()/2000)*BW*0.3;
+        const cy=BT+Math.cos(i*1.7+Date.now()/1800)*(SB-BT)*.4+(SB-BT)*.3;
+        const r=18+Math.sin(i*3.1)*10;
+        const cg=ctx.createRadialGradient(cx,cy,0,cx,cy,r);
+        cg.addColorStop(0,`rgba(220,240,255,${cloud*0.65})`);cg.addColorStop(1,'rgba(180,215,255,0)');
+        ctx.fillStyle=cg;ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fill();
+      }
+      ctx.restore();
+    }
+    if(dp.length>0){ctx.save();bPath();ctx.clip();
+      for(const d of dp){ctx.fillStyle=`rgba(180,220,255,${d.life*0.7})`;ctx.beginPath();ctx.arc(d.x,d.y,d.r,0,Math.PI*2);ctx.fill();}ctx.restore();}
+
+    // ふた
+    const capY=NT-4+cOY;
+    ctx.save();ctx.translate(BX,capY+9);ctx.rotate(cay*(-0.15));ctx.translate(-BX,-(capY+9));
+    ctx.globalAlpha=1-cay*.4;
+    const cg2=ctx.createLinearGradient(BX-NW/2-4,0,BX+NW/2+4,0);
+    cg2.addColorStop(0,'#5a9acc');cg2.addColorStop(.5,'#7ab8e0');cg2.addColorStop(1,'#5a9acc');
+    ctx.fillStyle=cg2;ctx.beginPath();ctx.roundRect(BX-NW/2-4,capY,NW+8,18,4);ctx.fill();
+    ctx.strokeStyle='#3a7ab0';ctx.lineWidth=1.5;ctx.beginPath();ctx.roundRect(BX-NW/2-4,capY,NW+8,18,4);ctx.stroke();
+    ctx.strokeStyle='rgba(255,255,255,.4)';ctx.lineWidth=1;
+    for(let i=0;i<3;i++){const ly=capY+4+i*4;ctx.beginPath();ctx.moveTo(BX-NW/2,ly);ctx.lineTo(BX+NW/2,ly);ctx.stroke();}
+    ctx.globalAlpha=1;ctx.restore();
+
+    // ホース接続金具（キャップ上端、ボトルより前面）
+    ctx.fillStyle='#4a8cc0';ctx.beginPath();ctx.arc(HEX,HEY+4,5,0,Math.PI*2);ctx.fill();
+
+    // ── 計器（右側） ──
+    const Pa_v=pts.length*UNIT_PA, Tc_v=TK-273.15;
+
+    // 温度計
+    const tcx=THCX;
+    ctx.fillStyle='rgba(255,255,255,.82)';ctx.beginPath();ctx.roundRect(GX,THT,GW,THH+BULB*2+14,10);ctx.fill();
+    ctx.strokeStyle='#7ab8e0';ctx.lineWidth=1.5;ctx.beginPath();ctx.roundRect(GX,THT,GW,THH+BULB*2+14,10);ctx.stroke();
+    ctx.fillStyle='#ddeeff';ctx.beginPath();ctx.roundRect(tcx-TUBE/2,THT+18,TUBE,THH-18,TUBE/2);ctx.fill();
+    ctx.strokeStyle='#a0cce8';ctx.lineWidth=1;ctx.beginPath();ctx.roundRect(tcx-TUBE/2,THT+18,TUBE,THH-18,TUBE/2);ctx.stroke();
+    const T_MIN2=10,T_MAX2=38;  // 現実範囲：10〜38℃
+    const tF=Math.max(0,Math.min(1,(Tc_v-T_MIN2)/(T_MAX2-T_MIN2)));
+    const lH=(THH-24)*tF, lY=THT+18+(THH-24)-lH;
+    if(lH>0){
+      const cf=Math.max(0,(27-Tc_v)/17);  // 27℃未満で青系に
+      const lg=ctx.createLinearGradient(0,lY,0,THT+THH-6);
+      lg.addColorStop(0,`rgba(${Math.round(60+cf*180)},${Math.round(150-cf*80)},255,.92)`);lg.addColorStop(1,'rgba(20,80,200,.92)');
+      ctx.fillStyle=lg;ctx.beginPath();ctx.roundRect(tcx-TUBE/2+2,lY,TUBE-4,lH,TUBE/4);ctx.fill();
+    }
+    ctx.strokeStyle='#6a9cbc';ctx.lineWidth=1;ctx.fillStyle='#4a7a9a';ctx.font='700 7px Space Mono,monospace';ctx.textAlign='right';
+    for(let t=T_MIN2+2;t<=T_MAX2;t+=2){  // 2℃刻みで目盛り
+      const ty=THT+18+(THH-24)*(1-(t-T_MIN2)/(T_MAX2-T_MIN2));
+      const isMajor=(t%5===0);  // 5℃ごとにラベル
+      ctx.beginPath();ctx.moveTo(tcx-TUBE/2-(isMajor?5:2),ty);ctx.lineTo(tcx-TUBE/2,ty);ctx.stroke();
+      if(isMajor)ctx.fillText(`${t}`,tcx-TUBE/2-6,ty+3);
+    }
+    const bcy=THT+THH+BULB+2;
+    const cf2=Math.max(0,(27-Tc_v)/67);
+    const bG=ctx.createRadialGradient(tcx-2,bcy-2,1,tcx,bcy,BULB);
+    bG.addColorStop(0,`rgba(${Math.round(74+cf2*80)},${Math.round(158+cf2*40)},255,.9)`);bG.addColorStop(1,'rgba(20,80,200,.95)');
+    ctx.fillStyle=bG;ctx.beginPath();ctx.arc(tcx,bcy,BULB,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle='#5a9acc';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(tcx,bcy,BULB,0,Math.PI*2);ctx.stroke();
+    ctx.fillStyle='rgba(255,255,255,.4)';ctx.beginPath();ctx.arc(tcx-3,bcy-3,BULB*.35,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#2a6090';ctx.font='700 8px M PLUS Rounded 1c,sans-serif';ctx.textAlign='center';
+    ctx.fillText('温度',tcx,THT+11);
+    // 温度数値（計器の真横・チューブ右隣）
+    ctx.fillStyle='#0a2a5a';ctx.font='bold 11px Space Mono,monospace';ctx.textAlign='left';
+    ctx.fillText(`${Tc_v.toFixed(1)}℃`,tcx+TUBE/2+6,THT+THH/2+4);
+
+    // 圧力計
+    ctx.fillStyle='rgba(255,255,255,.82)';ctx.beginPath();ctx.arc(PMCX,PMCY,PMR+14,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle='#7ab8e0';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(PMCX,PMCY,PMR+14,0,Math.PI*2);ctx.stroke();
+    ctx.fillStyle='#f0f8ff';ctx.beginPath();ctx.arc(PMCX,PMCY,PMR,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle='#a0cce8';ctx.lineWidth=2;ctx.beginPath();ctx.arc(PMCX,PMCY,PMR,0,Math.PI*2);ctx.stroke();
+    const PMAX=MAX_N*UNIT_PA;
+    ctx.strokeStyle='#6a9cbc';ctx.lineWidth=1;ctx.fillStyle='#3a6a8a';ctx.font='700 7px Space Mono,monospace';ctx.textAlign='center';
+    for(let i=0;i<=4;i++){
+      const ang=Math.PI*.75+(Math.PI*1.5)*(i/4);
+      ctx.beginPath();ctx.moveTo(PMCX+Math.cos(ang)*(PMR-7),PMCY+Math.sin(ang)*(PMR-7));
+      ctx.lineTo(PMCX+Math.cos(ang)*(PMR-1),PMCY+Math.sin(ang)*(PMR-1));ctx.stroke();
+      ctx.fillText(`${Math.round(PMAX*i/4/1000)}k`,PMCX+Math.cos(ang)*(PMR-16),PMCY+Math.sin(ang)*(PMR-16)+3);
+    }
+    const pF=Math.min(Pa_v/PMAX,1), nAng=Math.PI*.75+pF*(Math.PI*1.5);
+    ctx.strokeStyle='#e05050';ctx.lineWidth=2.5;ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(PMCX,PMCY);ctx.lineTo(PMCX+Math.cos(nAng)*(PMR-9),PMCY+Math.sin(nAng)*(PMR-9));ctx.stroke();
+    ctx.lineCap='butt';
+    ctx.fillStyle='#e05050';ctx.beginPath();ctx.arc(PMCX,PMCY,4,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(PMCX,PMCY,2,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#2a6090';ctx.font='700 8px M PLUS Rounded 1c,sans-serif';ctx.textAlign='center';
+    ctx.fillText('圧力',PMCX,PMCY-PMR-3);
+    // 圧力数値（計器の真横・円の右隣）
+    ctx.fillStyle='#5a0a0a';ctx.font='bold 11px Space Mono,monospace';ctx.textAlign='left';
+    ctx.fillText(`${Math.round(Pa_v)} Pa`,PMCX+PMR+16,PMCY-6);
+    ctx.fillText(`+ 101.3 kPa`,PMCX+PMR+16,PMCY+8);
+    ctx.textAlign='left';
+    // HTML readout 更新
+    document.getElementById('readoutPa').textContent=`${((pts.length*UNIT_PA+101325)/1000).toFixed(1)} kPa`;
+    document.getElementById('readoutTc').textContent=`${Tc_v.toFixed(1)} ℃`;
+    drawSimGraphs();
+
+    // ポンプボタン状態
+    const ok=ph===0&&pts.length<MAX_N;
+    pumpBtn.style.opacity=ok?'1':'0.55';
+    pumpBtn.style.cursor=ok?'pointer':'not-allowed';
+    pumpBtn.style.background=ok?'#1a7fde':'#7ab8e0';
+
+    requestAnimationFrame(loop);
+  }
+  loop();
+})();
+
+/* ===== PVT GRAPH ===== */
+(function(){
+  function drawExplainGraph(canvasId, xlabel, ylabel, xMax, yIntercept, slope, unit, color){
+    const c=document.getElementById(canvasId);if(!c)return;
+    const ctx=c.getContext('2d');
+    const W=c.width,H=c.height;
+    const pad={l:52,r:16,t:18,b:36};
+    const gw=W-pad.l-pad.r,gh=H-pad.t-pad.b;
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle='#f7fbff';ctx.fillRect(0,0,W,H);
+    // grid
+    ctx.strokeStyle='#ddeeff';ctx.lineWidth=1;
+    for(let i=1;i<=4;i++){
+      const x=pad.l+gw*i/4;ctx.beginPath();ctx.moveTo(x,pad.t);ctx.lineTo(x,pad.t+gh);ctx.stroke();
+      const y=pad.t+gh*i/4;ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+gw,y);ctx.stroke();
+    }
+    // axes
+    ctx.strokeStyle='#4a6a88';ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.moveTo(pad.l,pad.t);ctx.lineTo(pad.l,pad.t+gh);ctx.lineTo(pad.l+gw,pad.t+gh);ctx.stroke();
+    // labels
+    ctx.fillStyle='#4a6a88';ctx.font='bold 10px M PLUS Rounded 1c,sans-serif';ctx.textAlign='center';
+    ctx.fillText(xlabel,pad.l+gw/2,H-4);
+    ctx.save();ctx.translate(13,pad.t+gh/2);ctx.rotate(-Math.PI/2);ctx.fillText(ylabel,0,0);ctx.restore();
+    // Y-intercept label
+    const yMin=yIntercept,yMax=yIntercept+slope*xMax;
+    ctx.fillStyle='#888';ctx.font='9px Space Mono,monospace';ctx.textAlign='right';
+    ctx.fillText(yMin.toFixed(0)+unit,pad.l-3,pad.t+gh);
+    ctx.fillText(yMax.toFixed(0)+unit,pad.l-3,pad.t+8);
+    ctx.textAlign='center';
+    ctx.fillText('0',pad.l,pad.t+gh+14);
+    ctx.fillText(xMax,pad.l+gw,pad.t+gh+14);
+    // dotted intercept line at y-intercept
+    ctx.setLineDash([4,4]);ctx.strokeStyle='#b0c8e0';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(pad.l,pad.t+gh);ctx.lineTo(pad.l+gw,pad.t+gh);ctx.stroke();
+    ctx.setLineDash([]);
+    // line
+    const toX=v=>pad.l+(v/xMax)*gw;
+    const toY=v=>pad.t+gh-(((v-yMin)/(yMax-yMin))*gh);
+    ctx.strokeStyle=color;ctx.lineWidth=2.5;
+    ctx.beginPath();ctx.moveTo(toX(0),toY(yMin));ctx.lineTo(toX(xMax),toY(yMax));ctx.stroke();
+    // origin dot
+    ctx.fillStyle=color;ctx.beginPath();ctx.arc(toX(0),toY(yMin),5,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(toX(0),toY(yMin),3,0,Math.PI*2);ctx.fill();
+    // arrow hint
+    ctx.fillStyle='rgba(26,127,222,.12)';ctx.fillRect(pad.l,pad.t,gw,gh);
+    ctx.strokeStyle=color;ctx.lineWidth=2.5;
+    ctx.beginPath();ctx.moveTo(toX(0),toY(yMin));ctx.lineTo(toX(xMax),toY(yMax));ctx.stroke();
+  }
+  const UNIT_PA=3300,N_PER=6,MAX_PUMPS=10;
+  const P0=101325,Pmax=P0+UNIT_PA*N_PER*MAX_PUMPS;  // ≈299kPa
+  // N-P グラフ：原点(0, 101.3kPa)、傾き一定の直線
+  drawExplainGraph('pvtCanvas','ポンプ回数','圧力 (kPa)',MAX_PUMPS,P0/1000,(Pmax-P0)/1000/MAX_PUMPS,' kPa','#1a7fde');
+  // P-T グラフ：現実的な温度変化（+1〜+3℃程度、軸を狭く）
+  drawExplainGraph('pvtCanvas2','ゲージ圧 (kPa)','温度 (℃)',Math.round((Pmax-P0)/1000),25,2.5/Math.round((Pmax-P0)/1000),' ℃','#e07030');
+})();
+
+/* ===== SIM GRAPHS ===== */
+window._simGD=[];
+function drawSimGraphs(){
+  const panels=document.getElementById('graphPanels');
+  if(!panels||panels.style.display==='none')return;
+  const cPV=document.getElementById('graphPV');
+  const cPT=document.getElementById('graphPT');
+  if(!cPV||!cPT)return;
+  const data=window._simGD;
+  // 固定軸でグラフ描画。N-P: 原点(0, P0), P-T: 原点(P0, T_room)
+  const _P0=101325, _UNIT=3300, _NPER=6, _MAXP=10;
+  function drawGraph(canvas,xlabel,ylabel,getX,getY,color,xFixMin,xFixMax,yFixMin,yFixMax,theoreticalLine){
+    const ctx=canvas.getContext('2d');
+    const W=canvas.width,H=canvas.height;
+    const pad={l:58,r:14,t:20,b:36};
+    const gw=W-pad.l-pad.r,gh=H-pad.t-pad.b;
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle='#f7fbff';ctx.fillRect(0,0,W,H);
+    ctx.strokeStyle='#b8d4f0';ctx.lineWidth=1;
+    ctx.strokeRect(pad.l,pad.t,gw,gh);
+    // grid
+    ctx.strokeStyle='#ddeeff';ctx.lineWidth=.5;
+    for(let i=1;i<4;i++){
+      const x=pad.l+gw*i/4;ctx.beginPath();ctx.moveTo(x,pad.t);ctx.lineTo(x,pad.t+gh);ctx.stroke();
+      const y=pad.t+gh*i/4;ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+gw,y);ctx.stroke();
+    }
+    // axes
+    ctx.strokeStyle='#4a6a88';ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.moveTo(pad.l,pad.t);ctx.lineTo(pad.l,pad.t+gh);ctx.lineTo(pad.l+gw,pad.t+gh);ctx.stroke();
+    // labels
+    ctx.fillStyle='#4a6a88';ctx.font='bold 9px M PLUS Rounded 1c,sans-serif';ctx.textAlign='center';
+    ctx.fillText(xlabel,pad.l+gw/2,H-4);
+    ctx.save();ctx.translate(12,pad.t+gh/2);ctx.rotate(-Math.PI/2);ctx.fillText(ylabel,0,0);ctx.restore();
+    // axis ticks
+    ctx.fillStyle='#6a90aa';ctx.font='8px Space Mono,monospace';ctx.textAlign='right';
+    ctx.fillText(Math.round(yFixMin),pad.l-3,pad.t+gh);
+    ctx.fillText(Math.round(yFixMax),pad.l-3,pad.t+8);
+    ctx.textAlign='center';
+    ctx.fillText(Math.round(xFixMin),pad.l,pad.t+gh+12);
+    ctx.fillText(Math.round(xFixMax),pad.l+gw,pad.t+gh+12);
+    const xRange=xFixMax-xFixMin||1,yRange=yFixMax-yFixMin||1;
+    const toX=v=>pad.l+((v-xFixMin)/xRange)*gw;
+    const toY=v=>pad.t+gh-(((v-yFixMin)/yRange)*gh);
+    // theoretical line (dotted)
+    if(theoreticalLine){
+      ctx.setLineDash([5,4]);ctx.strokeStyle='rgba(100,160,220,.5)';ctx.lineWidth=1.5;
+      ctx.beginPath();ctx.moveTo(toX(theoreticalLine.x0),toY(theoreticalLine.y0));
+      ctx.lineTo(toX(theoreticalLine.x1),toY(theoreticalLine.y1));ctx.stroke();
+      ctx.setLineDash([]);
+    }
+    if(data.length<1)return;
+    // data line
+    ctx.strokeStyle=color;ctx.lineWidth=2;ctx.beginPath();
+    data.forEach((d,i)=>{const x=toX(getX(d)),y=toY(getY(d));i===0?ctx.moveTo(x,y):ctx.lineTo(x,y)});
+    ctx.stroke();
+    // dots
+    data.forEach(d=>{
+      const x=toX(getX(d)),y=toY(getY(d));
+      ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle=color;ctx.beginPath();ctx.arc(x,y,3,0,Math.PI*2);ctx.fill();
+    });
+  }
+  const Pmax=_P0+_UNIT*_NPER*_MAXP;
+  drawGraph(cPV,'ポンプ回数','圧力 (kPa)',d=>d.n,d=>d.Pa/1000,'#1a7fde',
+    0,_MAXP,_P0/1000,Pmax/1000,
+    {x0:0,y0:_P0/1000,x1:_MAXP,y1:Pmax/1000});
+  drawGraph(cPT,'圧力 (kPa)','温度 (℃)',d=>d.Pa/1000,d=>d.Tc,'#e07030',
+    _P0/1000,Pmax/1000,12,32,null);  // Y軸：12〜32℃（現実的な変化範囲）
+}
+(function(){
+  const btn=document.getElementById('graphToggle');
+  const panels=document.getElementById('graphPanels');
+  if(!btn||!panels)return;
+  let on=false;
+  btn.onclick=()=>{
+    on=!on;
+    panels.style.display=on?'flex':'none';
+    btn.textContent=on?'グラフ ON':'グラフ OFF';
+    btn.classList.toggle('active',on);
+    if(on)drawSimGraphs();
+  };
+})();
+
+/* ===== PHOTO MODAL ===== */
+(function(){
+  const info={
+    '1':{title:'自転車の空気入れ',caption:'ピストンを押すと容器内の体積が縮み、ボイルの法則（PV＝一定）により圧力が急上昇します。高まった圧力がタイヤ内の空気を押し広げ、タイヤが硬く膨らみます。空気の粒が狭い空間に詰め込まれるほど、壁に当たる回数が増えて圧力が上がるというイメージです。'},
+    '2':{title:'スプレー缶',caption:'缶の中には液化ガスが高圧で封入されています。ノズルを押すと外気圧との差で内容物が噴き出します。缶を加熱すると内部の圧力がさらに高まり（シャルルの法則）、破裂の危険があります。'},
+    '3':{title:'天気予報の低気圧',caption:'大気の圧力が周囲より低い領域を低気圧といいます。周囲の高圧の空気が流れ込んで上昇気流となり、上空で冷やされて雲が発生します。台風も非常に発達した低気圧の一種です。'},
+    '4':{title:'真空パック',caption:'袋の中の空気を抜くと内部の気圧がほぼ0になります。すると外側の大気圧（約101,325 Pa）が袋を均等に押し、食品に密着します。酸素を除くことで酸化・腐敗も防げます。'}
+  };
+  const modal=document.getElementById('pvimgModal');
+  const closeBtn=document.getElementById('pvimgClose');
+  const photo=document.getElementById('pvimgPhoto');
+  const titleEl=document.getElementById('pvimgTitle');
+  const caption=document.getElementById('pvimgCaption');
+  if(!modal)return;
+  document.querySelectorAll('[data-pvimg]').forEach(card=>{
+    card.addEventListener('click',()=>{
+      const id=card.dataset.pvimg;
+      const d=info[id];if(!d)return;
+      photo.src=`png${id}.png`;
+      photo.alt=d.title;
+      titleEl.textContent=`[ ${id} ] ${d.title}`;
+      caption.textContent=d.caption;
+      modal.classList.add('show');
+    });
+  });
+  closeBtn.onclick=()=>modal.classList.remove('show');
+  modal.onclick=(e)=>{if(e.target===modal)modal.classList.remove('show');};
+})();
+
+/* ===== CLOUD ANIMATION ===== */
+(function(){
+  const IDS=['scopeLink','footerScopeLink','footerLink'];
+  const URL='https://tus-scope.tokyo';
+  const overlay=document.getElementById('cloudOverlay');
+  const cv=document.getElementById('cloudCanvas');
+  function go(){
+    overlay.style.display='block';
+    cv.width=window.innerWidth;cv.height=window.innerHeight;
+    const ctx=cv.getContext('2d');const W=cv.width,H=cv.height;
+    const clouds=[];
+    for(let i=0;i<28;i++)clouds.push({x:Math.random()*W,y:H*.3+Math.random()*H*.5,r:60+Math.random()*120,vx:(Math.random()-.5)*.6,vy:-(0.3+Math.random()*.5),alpha:0,gs:0.008+Math.random()*.012,delay:Math.random()*1200});
+    for(let i=0;i<8;i++)clouds.push({x:W*.2+Math.random()*W*.6,y:H*.4+Math.random()*H*.3,r:120+Math.random()*200,vx:(Math.random()-.5)*.4,vy:-(0.2+Math.random()*.3),alpha:0,gs:0.006+Math.random()*.008,delay:400+Math.random()*800});
+    const t0=Date.now();
+    function dc(x,y,r,a){
+      const g=ctx.createRadialGradient(x,y,r*.1,x,y,r);
+      g.addColorStop(0,`rgba(220,235,255,${a})`);g.addColorStop(.5,`rgba(180,210,240,${a*.8})`);g.addColorStop(1,`rgba(150,190,220,0)`);
+      ctx.fillStyle=g;
+      [[0,0,1],[-.35,.15,.75],[.35,.15,.7],[-.15,-.25,.6],[.2,-.2,.55]].forEach(([dx,dy,sc])=>{ctx.beginPath();ctx.arc(x+r*dx,y+r*dy,r*sc,0,Math.PI*2);ctx.fill()});
+    }
+    function frame(){
+      const el=Date.now()-t0,pr=Math.min(el/3000,1);
+      ctx.clearRect(0,0,W,H);
+      ctx.fillStyle=`rgba(8,10,14,${Math.pow(pr,1.2)*.97})`;ctx.fillRect(0,0,W,H);
+      for(const cl of clouds){const age=el-cl.delay;if(age<0)continue;const ap=Math.min(age/2100,1);cl.alpha=Math.min(cl.alpha+cl.gs,.9*Math.pow(ap,.5));cl.x+=cl.vx;cl.y+=cl.vy;dc(cl.x,cl.y,cl.r*(1+ap*.4),cl.alpha)}
+      if(pr>.75){const fa=(pr-.75)/.25;ctx.fillStyle=`rgba(210,230,255,${Math.pow(fa,2)*.9})`;ctx.fillRect(0,0,W,H)}
+      pr<1?requestAnimationFrame(frame):(window.open(URL,'_blank','noopener'),setTimeout(()=>{overlay.style.transition='opacity .4s';overlay.style.opacity='0';setTimeout(()=>{overlay.style.display='none';overlay.style.opacity='1';overlay.style.transition=''},400)},100));
+    }
+    frame();
+  }
+  IDS.forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener('click',e=>{e.preventDefault();go()})});
+})();
+
+/* ===== CONFETTI on QUIZ CORRECT ===== */
+(function(){
+  const cc=document.getElementById('confettiCanvas');
+  if(!cc)return;
+  const ctx=cc.getContext('2d');
+  let particles=[],raf=null;
+  function launch(x,y){
+    cc.width=window.innerWidth;cc.height=window.innerHeight;
+    cc.style.display='block';
+    const colors=['#1a7fde','#4a9eff','#e07030','#ffd060','#60e080','#e040fb'];
+    for(let i=0;i<80;i++)particles.push({
+      x,y,vx:(Math.random()-0.5)*10,vy:-(4+Math.random()*8),
+      r:Math.random()*5+3,color:colors[Math.floor(Math.random()*colors.length)],
+      rot:Math.random()*360,rspeed:(Math.random()-0.5)*12,life:1
+    });
+    if(raf)cancelAnimationFrame(raf);
+    function frame(){
+      ctx.clearRect(0,0,cc.width,cc.height);
+      particles.forEach(p=>{
+        p.x+=p.vx;p.y+=p.vy;p.vy+=0.3;p.rot+=p.rspeed;p.life-=0.018;
+        ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rot*Math.PI/180);
+        ctx.globalAlpha=Math.max(0,p.life);ctx.fillStyle=p.color;
+        ctx.fillRect(-p.r/2,-p.r/2,p.r,p.r*1.6);ctx.restore();
+      });
+      particles=particles.filter(p=>p.life>0);
+      if(particles.length)raf=requestAnimationFrame(frame);
+      else{cc.style.display='none';ctx.clearRect(0,0,cc.width,cc.height);}
+    }
+    raf=requestAnimationFrame(frame);
+  }
+  document.querySelectorAll('.quiz-block').forEach(q=>{
+    q.querySelectorAll('.quiz-opt').forEach((o,i)=>{
+      o.addEventListener('click',()=>{
+        if(q.classList.contains('done'))return;
+        if(i===+q.dataset.answer){
+          const r=o.getBoundingClientRect();
+          launch(r.left+r.width/2,r.top+r.height/2);
+        }
+      },{capture:true});
+    });
+  });
+})();
+
+/* ===== INTRO ANIMATION ===== */
+(function(){
+  const veil=document.getElementById('introVeil');
+  if(!veil)return;
+
+  const cv=document.createElement('canvas');
+  cv.style.cssText='position:absolute;inset:0;width:100%;height:100%';
+  veil.appendChild(cv);
+  const W=cv.width=window.innerWidth, H=cv.height=window.innerHeight;
+  const ctx=cv.getContext('2d');
+  const cx=W/2, cy=H/2;
+  const startT=performance.now();
+
+  const eo=t=>1-(1-Math.min(1,Math.max(0,t)))**3;
+  const ph=(s,d,t)=>Math.min(1,Math.max(0,(t-s)/d));
+
+  // ロゴ画像
+  const logoImg=new Image();
+  logoImg.src='scope-logo.webp';
+
+  // 分子粒子（背景）
+  const N=45;
+  const pts=Array.from({length:N},()=>({
+    x:Math.random()*W, y:Math.random()*H,
+    vx:(Math.random()-.5)*.7, vy:(Math.random()-.5)*.7,
+    r:1.2+Math.random()*1.8, hue:195+Math.random()*50
+  }));
+
+  // 雲パフ（中心から広がる、薄め）
+  const clouds=[];
+  for(let i=0;i<50;i++){
+    const ang=Math.random()*Math.PI*2;
+    const dist=Math.random()*Math.min(W,H)*.38;
+    clouds.push({
+      x:cx+Math.cos(ang)*dist, y:cy+Math.sin(ang)*dist,
+      vx:Math.cos(ang)*(.18+Math.random()*.4),
+      vy:Math.sin(ang)*(.15+Math.random()*.3)-.22,
+      r:60+Math.random()*130,
+      a0:.28+Math.random()*.18,   // 薄めに設定
+      life:2000+Math.random()*1200,
+      delay:Math.random()*300
+    });
+  }
+
+  const waves=[]; let lastWave=-1e9;
+
+  function drawPuff(x,y,r,alpha){
+    if(alpha<=0.004)return;
+    const blobs=[[0,0,1],[-.38,.09,.7],[.38,.11,.66],[-.19,-.3,.58],[.21,-.27,.55]];
+    for(const [bx,by,bs] of blobs){
+      const gx=x+r*bx, gy=y+r*by, gr=r*bs;
+      const g=ctx.createRadialGradient(gx,gy,gr*.05,gx,gy,gr);
+      g.addColorStop(0,`rgba(185,215,255,${alpha})`);
+      g.addColorStop(.5,`rgba(140,185,230,${alpha*.6})`);
+      g.addColorStop(1,'rgba(110,160,220,0)');
+      ctx.fillStyle=g;
+      ctx.beginPath(); ctx.arc(gx,gy,gr,0,Math.PI*2); ctx.fill();
+    }
+  }
+
+  const LR=42, logoY=cy-55, uniY=cy+14, scopeY=cy+60;
+
+  function frame(now){
+    const t=now-startT;
+
+    // ── 全体フェードイン係数（0〜600ms で 0→1）──
+    const fadeIn=eo(ph(0,600,t));
+
+    // 背景
+    ctx.fillStyle='#0a1220'; ctx.fillRect(0,0,W,H);
+
+    // フェードイン前は何も描かない
+    if(fadeIn<=0){ requestAnimationFrame(frame); return; }
+
+    // ── 粒子ネットワーク ──
+    for(const p of pts){ p.x=(p.x+p.vx+W)%W; p.y=(p.y+p.vy+H)%H; }
+    const ptA=fadeIn*eo(ph(100,2000,t))*.7;
+    if(ptA>0.01){
+      ctx.lineWidth=.55;
+      for(let i=0;i<N;i++) for(let j=i+1;j<N;j++){
+        const dx=pts[i].x-pts[j].x, dy=pts[i].y-pts[j].y, d=Math.hypot(dx,dy);
+        if(d<110){
+          ctx.strokeStyle=`rgba(70,165,255,${(1-d/110)*ptA*.16})`;
+          ctx.beginPath(); ctx.moveTo(pts[i].x,pts[i].y); ctx.lineTo(pts[j].x,pts[j].y); ctx.stroke();
+        }
+      }
+      for(const p of pts){
+        ctx.shadowColor=`hsl(${p.hue},80%,65%)`; ctx.shadowBlur=7;
+        ctx.globalAlpha=ptA;
+        ctx.fillStyle=`hsl(${p.hue},80%,75%)`;
+        ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill();
+      }
+      ctx.globalAlpha=1; ctx.shadowBlur=0;
+    }
+
+    // ── 雲（薄い大気として描画）──
+    for(const c of clouds){
+      const age=t-c.delay; if(age<=0)continue;
+      const fade=1-eo(Math.min(1,age/c.life));
+      drawPuff(c.x+c.vx*age*.05,c.y+c.vy*age*.05,
+               c.r*(1+Math.min(1,age/c.life)*.4),c.a0*fade*fadeIn);
+    }
+
+    // ── ロゴ・テキスト（雲と独立して表示）──
+    ctx.save(); ctx.textAlign='center'; ctx.textBaseline='middle';
+
+    // ロゴ円 600ms〜
+    const aLogo=eo(ph(600,700,t))*fadeIn;
+    if(aLogo>0.01){
+      ctx.save();
+      ctx.globalAlpha=aLogo;
+      // ぼんやり光る輪
+      ctx.shadowColor='rgba(100,180,255,.8)'; ctx.shadowBlur=22;
+      ctx.fillStyle='#ffffff';
+      ctx.beginPath(); ctx.arc(cx,logoY,LR,0,Math.PI*2); ctx.fill();
+      ctx.strokeStyle='rgba(74,176,245,.65)'; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.arc(cx,logoY,LR+2,0,Math.PI*2); ctx.stroke();
+      ctx.shadowBlur=0;
+      if(logoImg.complete&&logoImg.naturalWidth>0){
+        ctx.save();
+        ctx.beginPath(); ctx.arc(cx,logoY,LR-1,0,Math.PI*2); ctx.clip();
+        ctx.drawImage(logoImg,cx-LR+1,logoY-LR+1,(LR-1)*2,(LR-1)*2);
+        ctx.restore();
+      }
+      ctx.restore();
+    }
+
+    // 「東京理科大学　理科教育サークル」1000ms〜
+    const aUni=eo(ph(1000,600,t))*fadeIn;
+    if(aUni>0.01){
+      ctx.globalAlpha=aUni;
+      ctx.shadowColor='rgba(100,180,255,.6)'; ctx.shadowBlur=10*(1-eo(ph(1000,1200,t)));
+      ctx.fillStyle='#b8d8f0';
+      ctx.font="500 15px 'M PLUS Rounded 1c',sans-serif";
+      ctx.fillText('東京理科大学　理科教育サークル',cx,uniY-12*(1-aUni/fadeIn));
+      ctx.shadowBlur=0;
+    }
+
+    // 「SCOPE」1500ms〜
+    const aScope=eo(ph(1500,700,t))*fadeIn;
+    if(aScope>0.01){
+      ctx.save();
+      ctx.translate(cx,scopeY); ctx.scale(.8+.2*(aScope/fadeIn),.8+.2*(aScope/fadeIn));
+      ctx.shadowColor='#1565c0'; ctx.shadowBlur=24*(1-eo(ph(1500,900,t)))+14;
+      ctx.globalAlpha=aScope;
+      ctx.fillStyle='#4ab0f5';
+      ctx.font="900 50px 'Space Mono',monospace";
+      ctx.fillText('SCOPE',0,0);
+      ctx.restore(); ctx.shadowBlur=0;
+    }
+
+    // 区切り線 2100ms〜
+    const aRule=eo(ph(2100,320,t))*fadeIn;
+    if(aRule>0.01){
+      ctx.globalAlpha=aRule*.38; ctx.strokeStyle='#4ab0f5'; ctx.lineWidth=1;
+      const rw=148*eo(ph(2100,320,t));
+      ctx.beginPath(); ctx.moveTo(cx-rw/2,scopeY+36); ctx.lineTo(cx+rw/2,scopeY+36); ctx.stroke();
+    }
+
+    ctx.restore();
+
+    // 圧力波リング 1400ms〜
+    if(t>1400&&t-lastWave>650){ waves.push({t0:t}); lastWave=t; }
+    for(let i=waves.length-1;i>=0;i--){
+      const wt=(t-waves[i].t0)/1100; if(wt>1){waves.splice(i,1);continue;}
+      ctx.strokeStyle=`rgba(70,160,255,${(1-wt)*.22*fadeIn})`; ctx.lineWidth=1.2;
+      ctx.beginPath(); ctx.arc(cx,cy,wt*Math.min(W,H)*.5,0,Math.PI*2); ctx.stroke();
+    }
+
+    // Loading... 右下
+    const dots='.'.repeat(Math.floor(t/380)%4);
+    ctx.save();
+    ctx.globalAlpha=.45*fadeIn; ctx.fillStyle='#4a7090';
+    ctx.font="700 11px 'Space Mono',monospace";
+    ctx.textAlign='right'; ctx.textBaseline='bottom';
+    ctx.fillText('Loading'+dots,W-20,H-18);
+    ctx.restore();
+
+    // ベール消去 3100ms〜
+    if(t>=3100){
+      const fp=Math.min(1,(t-3100)/700);
+      veil.style.opacity=String(1-fp);
+      if(fp>=1){ veil.remove(); return; }
+    }
+
+    requestAnimationFrame(frame);
+  }
+
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
+
